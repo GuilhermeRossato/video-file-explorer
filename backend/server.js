@@ -4,7 +4,6 @@ const { openBrowser } = require("./openBrowser.js");
 const app = express();
 
 app.use(express.static("frontend/public"));
-app.use("/node_modules/", express.static("node_modules"));
 
 const listener = app.listen(0, async function() {
   const { address, family, port } = listener.address();
