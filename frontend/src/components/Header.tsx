@@ -15,9 +15,7 @@ interface Props {
 
 const Header: FC<Props> = ({ title, handleMenuClose }): ReactElement => {
     return (
-        <Drawer
-            variant="permanent"
-        >
+        <Drawer variant="permanent">
             <div>
                 <IconButton onClick={handleMenuClose}>
                     <ChevronLeftIcon htmlColor="#000" />

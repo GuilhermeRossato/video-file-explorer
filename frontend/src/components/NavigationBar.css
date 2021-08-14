@@ -1,0 +1,8 @@
+.navigation-bar {
+    display: flex;
+}
+
+.navigation-bar > button {
+    width: 56px;
+}
+
