@@ -1,0 +1,21 @@
+.navigation-bar {
+    display: flex;
+    justify-content: center;
+}
+
+.navigation-bar > button {
+    width: 56px;
+}
+
+.navigation-bar .dropdown {
+    display: flex;
+    width: 48px;
+    height: 0px;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 15px;
+}
+
+.navigation-bar .MuiButton-root {
+    text-transform: none;
+}

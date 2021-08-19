@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import './App.css';
-import FileExplorer from './components/FileExplorer';
+import FileExplorer from './components/file-explorer/FileExplorer';
 import IconList from './components/IconList';
 import { AppBar, Toolbar, Typography, IconButton } from '@material-ui/core';
 import { FolderOpen } from '@material-ui/icons';
+import './App.css';
 
 async function getFilesInPath(path: string) {
     return [
@@ -40,11 +40,11 @@ function App() {
             {
                 showIcon ? (<IconList />) : (
                     <FileExplorer
-                        getFilesInPath={getFilesInPath}
+                        changeCurrentPath={(str: string) => { console.log("Mudou o caminho para ", str) }}
+                        defaultCurrentPath="C:/"
                     />
                 )
             }
-
         </div>
     );
 }
