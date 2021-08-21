@@ -3,14 +3,17 @@ import NavigationBar from './NavigationBar';
 import { dirname } from "path";
 
 interface Props {
-    changeCurrentPath: (path: string) => void;
-    defaultCurrentPath: string
+    commitPath: (path: string) => void;
+    currentInputPath: string
+    setCurrentInputPath: React.Dispatch<React.SetStateAction<string>>
 }
 
 const NavigationBarWrapper: FC<Props> = (props): ReactElement => {
-    const [currentInputPath, setCurrentInputPath] = useState(props.defaultCurrentPath);
-    const [historyList, setHistoryList] = useState<string[]>([props.defaultCurrentPath]);
+    const [currentInputPath, setCurrentInputPath] = [props.currentInputPath, props.setCurrentInputPath];
+
+    const [historyList, setHistoryList] = useState<string[]>([currentInputPath]);
     const [index, setIndex] = useState(0);
+
     const [showingHistory, setShowHistory] = useState(false);
 
     return (
@@ -30,23 +33,24 @@ const NavigationBarWrapper: FC<Props> = (props): ReactElement => {
 
                 pushToHistory={() => {
                     pushToHistory(historyList, index, setHistoryList, setIndex, currentInputPath);
-                    props.changeCurrentPath(currentInputPath);
+                    props.commitPath(currentInputPath);
                 }}
                 goBack={() => {
                     const newPath = goBack(historyList, index, setIndex, setCurrentInputPath);
-                    props.changeCurrentPath(newPath);
+                    props.commitPath(newPath);
                 }}
                 goForward={() => {
                     const newPath = goForward(historyList, index, setIndex, setCurrentInputPath);
-                    props.changeCurrentPath(newPath);
+                    props.commitPath(newPath);
                 }}
                 goUp={() => {
                     const newPath = goUp(historyList, index, setIndex, setCurrentInputPath, setHistoryList);
-                    props.changeCurrentPath(newPath);
+                    props.commitPath(newPath);
                 }}
                 selectFromHistory={(index: number) => {
                     const newPath = selectFromHistory(historyList, index, setIndex, setCurrentInputPath);
-                    props.changeCurrentPath(newPath);
+                    setShowHistory(false);
+                    props.commitPath(newPath);
                 }}
             ></NavigationBar>
         </div>
@@ -86,7 +90,7 @@ function canGoUp(historyList: string[], index: number) {
     if (historyList[index].length > 3 && historyList[index].substr(1, 2) === ":/") {
         return true;
     }
-    return (historyList[index].split("/").length > 2)
+    return (historyList[index].split("\\").join("/").split("/").length > 2)
 }
 
 function selectFromHistory(historyList: string[], index: number, setIndex: Dispatch<SetStateAction<number>>, setInputPath: Dispatch<SetStateAction<string>>) {
@@ -120,7 +124,9 @@ function goUp(historyList: string[], index: number, setIndex: Dispatch<SetStateA
     if (!canGoUp(historyList, index)) {
         throw new Error("Cannot go forward");
     }
-    let newPath = dirname(historyList[index]);
+    console.log(historyList[index]);
+    let newPath = dirname(historyList[index].split("\\").join("/"));
+    console.log(newPath);
     if (newPath.length === 2 && newPath[1] === ":") {
         newPath += "/";
     }
@@ -141,7 +147,6 @@ function pushToHistory(historyList: string[], index: number, setHistoryList: Dis
     setHistoryList(newHistoryList);
     setIndex(index + 1);
 }
-
 
 export default NavigationBarWrapper;
 

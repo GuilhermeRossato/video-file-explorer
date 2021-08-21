@@ -1,0 +1,7 @@
+.file-explorer .MuiButtonBase-root.MuiTableSortLabel-root {
+    width: 100%;
+}
+
+.file-explorer .MuiTableRow-root:hover {
+    background-color: #3f51b52e;
+}

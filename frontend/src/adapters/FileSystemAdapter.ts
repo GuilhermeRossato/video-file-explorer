@@ -1,15 +1,32 @@
-const endpoint = `http://[::1]:65367/`;
+const endpoint = `http://[::1]:9090/`;
 
-type ClientFileInfo = {
+export type ClientFileInfo = {
     path: string,
     name: string,
-    mtime: Date
+    mtime: Date,
+    type: string,
+    message?: string,
+    size: number
 }
 
 type ServerFileInfo = {
     path: string,
     name: string,
-    mtime: string
+    mtime: string,
+    type: string,
+    message?: string,
+    size: number,
+}
+
+function generateClientFileInfo(file: ServerFileInfo) {
+    return {
+        path: file.path,
+        name: file.name,
+        mtime: new Date(file.mtime),
+        type: file.type,
+        message: file.message,
+        size: file.size
+    };
 }
 
 export async function readFolderContents(path: string) {
@@ -32,13 +49,7 @@ export async function readFolderContents(path: string) {
         throw new Error("Server returned unexpected object: Invalid 'files' array");
     }
 
-    const files: ClientFileInfo[] = result.files.map(
-        (file: ServerFileInfo) => ({
-            path: file.path,
-            name: file.name,
-            mtime: new Date(file.mtime)
-        })
-    )
+    const files: ClientFileInfo[] = result.files.map(generateClientFileInfo);
 
     return files;
 }

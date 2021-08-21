@@ -41,7 +41,7 @@ const NavigationBar: FC<Props> = (props): ReactElement => {
                     </IconButton>
                 </span>
             </Tooltip>
-            <div>
+            <div style={{maxHeight: 56}}>
                 <Tooltip title="History" placement="bottom">
                     <span>
                         <IconButton color="primary" onClick={props.toggleHistory} disabled={!props.canShowHistory}>
@@ -49,27 +49,27 @@ const NavigationBar: FC<Props> = (props): ReactElement => {
                         </IconButton>
                     </span>
                 </Tooltip>
+                <div className="dropdown">
                 {
                     props.isShowingHistory ? (
-                        <div className="dropdown" >
-                            <div style={{position: "relative", zIndex: 10, backgroundColor: "white"}}>
-                                <ButtonGroup
-                                    orientation="vertical"
-                                    color="primary"
-                                    aria-label="outlined primary button group"
-                                >
-                                    {
-                                        props.historyList.map((historyText, index) => (
-                                            <Button key={index} onClick={props.selectFromHistory.bind(this, index)}>
-                                                {historyText}
-                                            </Button>
-                                        ))
-                                    }
-                                </ButtonGroup>
-                            </div>
+                        <div style={{position: "relative", left: "10px", zIndex: 10, backgroundColor: "white"}}>
+                            <ButtonGroup
+                                orientation="vertical"
+                                color="primary"
+                                aria-label="outlined primary button group"
+                            >
+                                {
+                                    props.historyList.map((historyText, index) => (
+                                        <Button key={index} onClick={props.selectFromHistory.bind(this, index)}>
+                                            {historyText}
+                                        </Button>
+                                    ))
+                                }
+                            </ButtonGroup>
                         </div>
                     ) : null
                 }
+                </div>
             </div>
             <Tooltip title="Parent folder" placement="bottom">
                 <span>
@@ -83,6 +83,7 @@ const NavigationBar: FC<Props> = (props): ReactElement => {
                 variant="outlined"
                 value={props.currentPath}
                 onChange={(event) => props.onTextChange(event.target.value)}
+                onKeyDown={(event) => event.code === "Enter" && props.pushToHistory()}
             />
             <Tooltip title="Navigate" placement="bottom">
                 <IconButton color="primary" onClick={props.pushToHistory}>
