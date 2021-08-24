@@ -20,7 +20,7 @@ interface FileInfoMetadata extends ClientFileInfo {
         duration: number;
         width: number;
         height: number;
-    }
+    } | null
 }
 
 const FileExplorer: FC<Props> = (props): ReactElement => {
@@ -37,7 +37,7 @@ const FileExplorer: FC<Props> = (props): ReactElement => {
 
     useEffect(() => {
         loadPath(currentPath, setIsLoading, setLoadingPath, setErrorMessage, setFileList, defaultCurrentPath)
-    }, []);
+    }, [defaultCurrentPath]);
 
     function onRefreshClick() {
         setErrorMessage("");
@@ -124,12 +124,18 @@ function renderContent(
                             onClick={onSortLabelClick.bind(null, "duration")}
                         >Duration</TableSortLabel>
                     </TableCell>
-                    <TableCell>Size</TableCell>
                     <TableCell>
                         <TableSortLabel
                             active={order.column === "size"}
                             direction={order.column === "size" ? (order.order === "asc" ? "asc" : "desc") : 'asc'}
                             onClick={onSortLabelClick.bind(null, "size")}
+                        >Size</TableSortLabel>
+                    </TableCell>
+                    <TableCell>
+                        <TableSortLabel
+                            active={order.column === "fileSize"}
+                            direction={order.column === "fileSize" ? (order.order === "asc" ? "asc" : "desc") : 'asc'}
+                            onClick={onSortLabelClick.bind(null, "fileSize")}
                         >File Size</TableSortLabel></TableCell>
                     <TableCell>
                         <TableSortLabel
@@ -142,7 +148,11 @@ function renderContent(
             </TableHead>
             <TableBody>
                 {
-                    fileList.sort(findSortFunctionByOrder(order)).map(renderFileComponent.bind(null, commitPath))
+                    fileList.length === 0 ? (
+                        <TableRow>
+                            <TableCell colSpan={6} align={"center"}>There are no files inside this folder</TableCell>
+                        </TableRow>
+                    ) : fileList.sort(findSortFunctionByOrder(order)).map(renderFileComponent.bind(null, commitPath))
                 }
             </TableBody>
         </Table>
@@ -173,33 +183,70 @@ function findSortFunctionByOrder({column, order}: {column: string, order: "asc" 
         }
     } else if (column === "duration") {
         return function orderByDuration(left: FileInfoMetadata, right: FileInfoMetadata) {
-            if (typeof left.metadata === "object" && typeof right.metadata === "object") {
-                if (left.metadata.duration === right.metadata.duration) {
-                    return 0;
-                } else {
+            if (typeof left.metadata !== "string" && left.metadata !== null && left.metadata !== undefined) {
+                // leftHasDuration
+                if (typeof right.metadata !== "string" && right.metadata !== null && right.metadata !== undefined) {
+                    // rightHasDuration
                     return (left.metadata.duration > right.metadata.duration ? 1 : -1) * (order === "asc" ? 1 : -1);
+                } else {
+                    // leftHasDuration && !rightHasDuration
+                    return -1;
                 }
             } else {
-                if (typeof left.metadata === "object") {
-                    return -1;
-                } else {
+                // !leftHasDuration
+                if (typeof right.metadata !== "string" && right.metadata !== null && right.metadata !== undefined) {
+                    // rightHasDuration
                     return 1;
+                } else {
+                    // !leftHasDuration && !rightHasDuration
+                    return 0;
                 }
             }
         }
     } else if (column === "size") {
         return function orderBySize(left: FileInfoMetadata, right: FileInfoMetadata) {
-            if (left.size === null || left.size === undefined) {
-                if (right.size === null || right.size === undefined) {
-                    return 0;
+            if (typeof left.metadata === "object" && left.metadata && left.metadata.duration) {
+                if (typeof right.metadata === "object" && right.metadata && right.metadata.duration) {
+                    // leftHasSize && rightHasSize
+                    if (left.metadata.width === right.metadata.width) {
+                        return 0;
+                    }
+                    return ((left.metadata.width > right.metadata.width) ? 1 : -1) * (order === "asc" ? 1 : -1);
                 } else {
-                    return 1 * (order === "asc" ? 1 : -1);
+                    // leftHasSize && !rightHasSize
+                    return -1;
                 }
-            } else if (left.size === right.size) {
-                return 0;
             } else {
+                if (typeof right.metadata === "object" && right.metadata && right.metadata.duration) {
+                    // !leftHasSize && rightHasSize
+                    return 1;
+                } else {
+                    // !leftHasSize && !rightHasSize
+                    return 0;
+                }
+            }
+        }
+    } else if (column === "fileSize") {
+        return function orderByFileSize(left: FileInfoMetadata, right: FileInfoMetadata) {
+            const leftHasSize = !(left.type === "dir" || left.size === null || left.size === undefined);
+            const rightHasSize = !(right.type === "dir" || right.size === null || right.size === undefined);
+
+            if (leftHasSize && rightHasSize) {
+                if (left.size === right.size) {
+                    return 0;
+                }
                 return (left.size > right.size ? 1 : -1) * (order === "asc" ? 1 : -1);
             }
+            if (!leftHasSize && !rightHasSize) {
+                return 0;
+            }
+            if (leftHasSize) {
+                return -1;
+            }
+            if (rightHasSize) {
+                return 1;
+            }
+            return 0;
         }
     } else if (column === "mtime") {
         return function orderByModifiedTime(left: FileInfoMetadata, right: FileInfoMetadata) {

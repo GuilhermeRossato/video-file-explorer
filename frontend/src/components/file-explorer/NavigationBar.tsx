@@ -3,40 +3,38 @@ import { IconButton, TextField, Tooltip, ButtonGroup, Button } from '@material-u
 import { ArrowForward, SubdirectoryArrowRightOutlined, ExpandMore } from '@material-ui/icons';
 
 import './NavigationBar.css'
+import { NavigationProps } from "../../hooks/useNavigation";
 
 interface Props {
     currentPath: string,
     onTextChange: (text: string) => void;
 
-    canGoBack?: boolean;
-    canGoForward?: boolean;
-    canGoUp?: boolean;
+    navigation: NavigationProps;
 
     canShowHistory?: boolean;
     toggleHistory: () => void;
     isShowingHistory: boolean;
-    pushToHistory: () => void;
-    historyList: string[];
-    goBack: () => void;
-    goForward: () => void;
-    goUp: () => void;
-
-    selectFromHistory: (index: number) => void;
 }
 
 const NavigationBar: FC<Props> = (props): ReactElement => {
+
+    function selectFromHistory(index: number) {
+        props.toggleHistory();
+        props.navigation.selectFromHistory(index);
+    }
+
     return (
         <div className="navigation-bar">
             <Tooltip title="Go back" placement="bottom">
                 <span>
-                    <IconButton color="primary" onClick={props.goBack} disabled={!props.canGoBack}>
+                    <IconButton color="primary" onClick={props.navigation.goBack} disabled={!props.navigation.canGoBack}>
                         <ArrowForward style={{ transform: "rotate(180deg)" }} />
                     </IconButton>
                 </span>
             </Tooltip>
             <Tooltip title="Go forward" placement="bottom">
                 <span>
-                    <IconButton color="primary" onClick={props.goForward} disabled={!props.canGoForward}>
+                    <IconButton color="primary" onClick={props.navigation.goForward} disabled={!props.navigation.canGoForward}>
                         <ArrowForward />
                     </IconButton>
                 </span>
@@ -57,15 +55,13 @@ const NavigationBar: FC<Props> = (props): ReactElement => {
                                 orientation="vertical"
                                 color="primary"
                                 aria-label="outlined primary button group"
-                            >
-                                {
-                                    props.historyList.map((historyText, index) => (
-                                        <Button key={index} onClick={props.selectFromHistory.bind(this, index)}>
-                                            {historyText}
-                                        </Button>
-                                    ))
-                                }
-                            </ButtonGroup>
+                            >{
+                                props.navigation.historyList.map((historyText, index) => (
+                                    <Button key={index} onClick={selectFromHistory.bind(this, index)}>
+                                        {historyText}
+                                    </Button>
+                                ))
+                            }</ButtonGroup>
                         </div>
                     ) : null
                 }
@@ -73,7 +69,7 @@ const NavigationBar: FC<Props> = (props): ReactElement => {
             </div>
             <Tooltip title="Parent folder" placement="bottom">
                 <span>
-                    <IconButton color="primary" onClick={props.goUp} disabled={!props.canGoUp}>
+                    <IconButton color="primary" onClick={props.navigation.goUp} disabled={!props.navigation.canGoUp}>
                         <ArrowForward style={{ transform: "rotate(-90deg)" }} />
                     </IconButton>
                 </span>
@@ -83,10 +79,10 @@ const NavigationBar: FC<Props> = (props): ReactElement => {
                 variant="outlined"
                 value={props.currentPath}
                 onChange={(event) => props.onTextChange(event.target.value)}
-                onKeyDown={(event) => event.code === "Enter" && props.pushToHistory()}
+                onKeyDown={(event) => event.code === "Enter" && props.navigation.pushToHistory(props.currentPath)}
             />
             <Tooltip title="Navigate" placement="bottom">
-                <IconButton color="primary" onClick={props.pushToHistory}>
+                <IconButton color="primary" onClick={() => props.navigation.pushToHistory(props.currentPath)}>
                     <SubdirectoryArrowRightOutlined />
                 </IconButton>
             </Tooltip>
