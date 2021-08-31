@@ -6,13 +6,15 @@ A ReactJS app to browse the host file system that shows metadata about video suc
 
 # How to run
 
-You must have [NodeJS](https://nodejs.org/), npm and [ffmpeg](https://www.ffmpeg.org/) installed
+You must have [Nodejs+npm](https://nodejs.org/), [ffmpeg](https://www.ffmpeg.org/) installed to run this program. You may use the following commands in your terminal if you have [git](https://git-scm.com/downloads) installed:
 
 ```
-git clone ...
-cd video-explorer-app
+git clone https://github.com/GuilhermeRossato/video-file-explorer.git
+cd video-file-explorer
 npm run start
 ```
+
+The program detects whether or not the dependencies are missing and runs `npm install` for you before executing, so it might take a while the first time.
 
 # Component Hierarchy
 
