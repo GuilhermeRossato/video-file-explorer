@@ -1,6 +1,6 @@
 # Video Explorer
 
-A ReactJS application to browse the host file system that shows metadata about video such as duration and size.
+A ReactJS app to browse the host file system that shows metadata about video such as duration and size.
 
 ![Demonstration](demonstration.png)
 
@@ -13,6 +13,20 @@ git clone ...
 cd video-explorer-app
 npm run start
 ```
+
+# Component Hierarchy
+
+    - App
+      - Header
+      - FileExplorer
+        - NavigationBarWrapper
+          - NavigationBar
+
+# Adapters
+
+ - FileSystemAdapter: Request file system data such as file lists and cwd.
+
+ - VideoAdapter: Resolves video type from file name and request video metadata.
 
 # Technologies
 
