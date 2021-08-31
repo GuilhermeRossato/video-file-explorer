@@ -1,27 +1,27 @@
 import React, { ReactElement, FC } from "react";
-import {
-    createStyles,
-    makeStyles,
-    Theme,
-    IconButton,
-    Drawer,
-} from "@material-ui/core";
-import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
+import { AppBar, Toolbar, Typography, IconButton } from '@material-ui/core';
+import { FolderOpen } from '@material-ui/icons';
 
 interface Props {
-    title: String;
-    handleMenuClose: () => void;
+    showIcon: boolean;
+    setShowIcon: (value: boolean) => void;
 }
 
-const Header: FC<Props> = ({ title, handleMenuClose }): ReactElement => {
+const Header: FC<Props> = ({ showIcon, setShowIcon }): ReactElement => {
     return (
-        <Drawer variant="permanent">
-            <div>
-                <IconButton onClick={handleMenuClose}>
-                    <ChevronLeftIcon htmlColor="#000" />
+        <AppBar position="static" style={{marginBottom: "10px"}}>
+            <Toolbar>
+                <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="show icon list"
+                    onClick={() => setShowIcon(!showIcon)}
+                >
+                    <FolderOpen />
                 </IconButton>
-            </div>
-        </Drawer>
+                <Typography variant="h6">Video Explorer</Typography>
+            </Toolbar>
+        </AppBar>
     );
 };
 

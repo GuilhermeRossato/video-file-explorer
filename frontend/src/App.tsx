@@ -1,35 +1,61 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import FileExplorer from './components/file-explorer/FileExplorer';
 import IconList from './components/IconList';
-import { AppBar, Toolbar, Typography, IconButton } from '@material-ui/core';
-import { FolderOpen } from '@material-ui/icons';
+import Header from "./components/Header";
 import './App.css';
+import { readCwd } from './adapters/FileSystemAdapter';
 
 function App() {
+    const [cwd, setCwd] = useState<string | null>(null);
     const [showIcon, setShowIcon] = useState(false);
+    const [isExploringFiles, setExploringFiles] = useState(true);
+    const [startupError, setStartupError] = useState("");
+
+    useEffect(function() {
+        readCwd().then(
+            setCwd,
+            (err) => setStartupError(err.message)
+        )
+    }, []);
+
+    const header = useMemo(
+        () => (<Header showIcon={showIcon} setShowIcon={setShowIcon} />),
+        [showIcon]
+    );
+
+    const content = useMemo(
+        () => {
+            if (startupError) {
+                return (<div>
+                    <h1>Fatal Error</h1>
+                    <p>Could not retrieve cwd data from server:</p>
+                    <code>{startupError}</code>
+                </div>);
+            }
+            if (!cwd) {
+                return (<div>Loading</div>);
+            }
+            if (showIcon) {
+                return (<IconList />);
+            }
+            if (!isExploringFiles) {
+                return (<div>File display not implemented</div>)
+            }
+            return <FileExplorer
+                onSelectFile={(path: string) => {
+                    console.log("File selected:", path);
+                    setExploringFiles(false);
+                }}
+                defaultCurrentPath={cwd}
+            />
+        },
+        [ cwd, showIcon, isExploringFiles, startupError ]
+    );
+
     return (
         <div className="app">
-            <AppBar position="static" style={{marginBottom: "10px"}}>
-                <Toolbar>
-                    <IconButton
-                        edge="start"
-                        color="inherit"
-                        aria-label="showIcon"
-                        onClick={() => setShowIcon(!showIcon)}
-                    >
-                        <FolderOpen />
-                    </IconButton>
-                    <Typography variant="h6">Video Slicer</Typography>
-                </Toolbar>
-            </AppBar>
-            {
-                showIcon ? (<IconList />) : (
-                    <FileExplorer
-                        changeCurrentPath={(str: string) => { console.log("Mudou o caminho para ", str) }}
-                        defaultCurrentPath="C:\Users\gui_r\dev\audio-quality"
-                    />
-                )
-            }
+            { header }
+            { content }
         </div>
     );
 }
