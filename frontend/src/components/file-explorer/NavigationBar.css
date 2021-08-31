@@ -11,9 +11,8 @@
     display: flex;
     width: 48px;
     height: 0px;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-start;
-    margin-top: 15px;
 }
 
 .navigation-bar .MuiButton-root {
