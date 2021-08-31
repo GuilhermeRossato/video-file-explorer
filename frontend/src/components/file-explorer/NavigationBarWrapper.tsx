@@ -1,19 +1,15 @@
-import React, { useState, useEffect, Dispatch, SetStateAction, FC, ReactElement } from 'react';
+import React, { useState, Dispatch, SetStateAction, FC, ReactElement } from 'react';
 import NavigationBar from './NavigationBar';
-import { useNavigation, NavigationProps } from '../../hooks/useNavigation';
+import { NavigationProps } from '../../hooks/useNavigation';
 
 interface Props {
-    commitPath: (path: string) => void;
+    navigation: NavigationProps;
     currentInputPath: string
-    setCurrentInputPath: React.Dispatch<React.SetStateAction<string>>
+    setCurrentInputPath: Dispatch<SetStateAction<string>>
 }
 
 const NavigationBarWrapper: FC<Props> = (props): ReactElement => {
-    const navigation: NavigationProps = useNavigation(
-        props.currentInputPath,
-        props.setCurrentInputPath,
-        props.commitPath
-    );
+    const navigation: NavigationProps = props.navigation;
 
     const [showingHistory, setShowHistory] = useState(false);
 
