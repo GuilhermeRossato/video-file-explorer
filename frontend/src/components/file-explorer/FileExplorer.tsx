@@ -7,11 +7,12 @@ import { ClientFileInfo, readFolderContents } from '../../adapters/FileSystemAda
 import { getVideoMetadata, getVideoTypeFromFilename } from '../../adapters/VideoAdapter';
 import { getHumanReadablePeriod } from '../../helpers/getHumanReadablePeriod';
 import { getHumanReadableSize } from '../../helpers/getHumanReadableSize';
+import { useNavigation, NavigationProps } from '../../hooks/useNavigation';
 import "./FileExplorer.css";
 
 interface Props {
-    changeCurrentPath: (path: string) => void;
-    defaultCurrentPath: string
+    defaultCurrentPath: string;
+    onSelectFile: (str: string) => void;
 }
 
 interface FileInfoMetadata extends ClientFileInfo {
@@ -57,17 +58,32 @@ const FileExplorer: FC<Props> = (props): ReactElement => {
         loadPath(currentPath, setIsLoading, setLoadingPath, setErrorMessage, setFileList, path);
     }
 
+    const navigation: NavigationProps = useNavigation(
+        currentInputPath,
+        setCurrentInputPath,
+        commitPath
+    );
+
     return (
         <div className="file-explorer">
             <div className="file-explorer-top">
                 <NavigationBarWrapper
+                    navigation={navigation}
                     currentInputPath={currentInputPath}
                     setCurrentInputPath={setCurrentInputPath}
-                    commitPath={commitPath}
                 />
             </div>
             {
-                renderContent(errorMessage, isLoading, fileList, ordering, onRefreshClick, onSortLabelClick, commitPath)
+                renderContent(
+                    errorMessage,
+                    isLoading,
+                    fileList,
+                    ordering,
+                    onRefreshClick,
+                    onSortLabelClick,
+                    navigation.pushToHistory,
+                    props.onSelectFile
+                )
             }
         </div>
     );
@@ -80,7 +96,8 @@ function renderContent(
     order: {column: string, order: "asc" | "desc"},
     onRefreshClick: () => void,
     onSortLabelClick: (column: string) => void,
-    commitPath: (path: string) => void
+    pushToHistory: (path: string) => void,
+    selectFile: (path: string) => void
 ) {
     if (errorMessage) {
         return (
@@ -152,7 +169,7 @@ function renderContent(
                         <TableRow>
                             <TableCell colSpan={6} align={"center"}>There are no files inside this folder</TableCell>
                         </TableRow>
-                    ) : fileList.sort(findSortFunctionByOrder(order)).map(renderFileComponent.bind(null, commitPath))
+                    ) : fileList.sort(findSortFunctionByOrder(order)).map(renderFileComponent.bind(null, pushToHistory, selectFile))
                 }
             </TableBody>
         </Table>
@@ -275,7 +292,8 @@ function formatDurationForDisplay(duration: number) {
 }
 
 function renderFileComponent(
-    changeCurrentPath: (path: string) => void,
+    pushToHistory: (path: string) => void,
+    selectFile: (path: string) => void,
     file: FileInfoMetadata,
     index: number
 ) {
@@ -284,7 +302,7 @@ function renderFileComponent(
     const fileSizeString = file.type === "file" ? getHumanReadableSize(file.size) : "";
 
     return (
-        <TableRow key={index} onClick={changeCurrentPath.bind(null, file.path + "/" + file.name)}>
+        <TableRow key={index} onClick={file.type === "file" ? selectFile.bind(null, file.path) : pushToHistory.bind(null, file.path + "/" + file.name)}>
             <TableCell>{
                 file.type === "dir" ? <Folder /> : (
                     file.type === "file" ? <InsertDriveFileOutlined /> : (file.type === "error" ? <ErrorIcon /> : file.type)
