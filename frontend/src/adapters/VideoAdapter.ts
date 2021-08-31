@@ -1,4 +1,4 @@
-const endpoint = `http://[::1]:9090/`;
+const endpoint = `http://[::1]:8081/`;
 
 export async function getVideoMetadata(filePath: string) {
     const response = await fetch(endpoint + "api/get-video-metadata/", {
