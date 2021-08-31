@@ -1,4 +1,4 @@
-const endpoint = `http://[::1]:9090/`;
+const endpoint = `http://[::1]:8081/`;
 
 export type ClientFileInfo = {
     path: string,
@@ -27,6 +27,25 @@ function generateClientFileInfo(file: ServerFileInfo) {
         message: file.message,
         size: file.size
     };
+}
+
+export async function readCwd() {
+    const response = await fetch(endpoint + "api/cwd/");
+    if (!response.ok) {
+        const result = await response.json();
+        if (result && result.error) {
+            throw new Error("Server returned error message: " + result.error);
+        }
+        throw new Error("Server returned status code " + response.status + ": " + response.statusText);
+    }
+    const result: ({error: string} | {cwd: string}) = await response.json();
+    if (result && "error" in result) {
+        throw new Error("Server returned error message: " + result.error);
+    }
+    if (typeof result.cwd !== "string") {
+        throw new Error("Server returned unexpected object: Invalid 'cwd' property");
+    }
+    return result.cwd;
 }
 
 export async function readFolderContents(path: string) {
